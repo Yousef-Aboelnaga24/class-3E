@@ -13,6 +13,7 @@ import Timeline from './pages/Timeline'
 import Members from './pages/Members'
 import Profile from './pages/Profile'
 import Confessions from './pages/Confessions'
+import Admin from './pages/Admin'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import VerifyEmail from './pages/auth/VerifyEmail'
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/members" element={<Members />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile/:id" element={<Profile />} />
               <Route path="/confessions" element={<Confessions />} />

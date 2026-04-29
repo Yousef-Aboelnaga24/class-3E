@@ -2,32 +2,27 @@ import axiosClient from '../api/axiosClient';
 
 const postService = {
     async getPosts(page = 1) {
-        const response = await axiosClient.get(`/posts?page=${page}`);
-        return response.data;
+        return await axiosClient.get(`/posts?page=${page}`);
     },
 
     async getPost(id) {
-        const response = await axiosClient.get(`/posts/${id}`);
-        return response.data;
+        return await axiosClient.get(`/posts/${id}`);
     },
 
     async createPost(formData) {
-        const response = await axiosClient.post('/posts', formData, {
+        return await axiosClient.post('/posts', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        return response.data;
     },
 
     async updatePost(id, data) {
-        const response = await axiosClient.put(`/posts/${id}`, data);
-        return response.data;
+        return await axiosClient.put(`/posts/${id}`, data);
     },
 
     async deletePost(id) {
-        const response = await axiosClient.delete(`/posts/${id}`);
-        return response.data;
+        return await axiosClient.delete(`/posts/${id}`);
     },
 };
 

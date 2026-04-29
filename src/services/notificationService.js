@@ -2,18 +2,15 @@ import axiosClient from '../api/axiosClient';
 
 const notificationService = {
     async getNotifications() {
-        const response = await axiosClient.get('/notifications');
-        return response.data;
+        return await axiosClient.get('/notifications');
     },
 
     async markAsRead(id) {
-        const response = await axiosClient.post(`/notifications/${id}/read`);
-        return response.data;
+        return await axiosClient.post(`/notifications/${id}/read`);
     },
 
     async markAllAsRead() {
-        const response = await axiosClient.post('/notifications/read-all');
-        return response.data;
+        return await axiosClient.post('/notifications/read-all');
     },
 };
 

@@ -9,25 +9,33 @@ import toast from 'react-hot-toast';
 
 export default function MemoryCard({ post }) {
   const { user: currentUser } = useAuth();
+
   const [myReaction, setMyReaction] = useState(post.my_reaction);
   const [reactionsCount, setReactionsCount] = useState(post.reactions_count);
+  const [heartBurst, setHeartBurst] = useState(false);
+
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
+  // ❤️ Reaction Toggle
   const handleToggleReaction = async () => {
     const previousReaction = myReaction;
     const previousCount = reactionsCount;
 
-    // Optimistic UI
-    if (myReaction) {
-      setMyReaction(null);
-      setReactionsCount(prev => prev - 1);
-    } else {
-      setMyReaction('like');
-      setReactionsCount(prev => prev + 1);
+    // optimistic update
+    const nextReaction = myReaction ? null : 'like';
+
+    setMyReaction(nextReaction);
+    setReactionsCount(prev =>
+      nextReaction ? prev + 1 : prev - 1
+    );
+    if (nextReaction) {
+      setHeartBurst(true);
+      window.setTimeout(() => setHeartBurst(false), 520);
     }
 
     try {
@@ -39,37 +47,73 @@ export default function MemoryCard({ post }) {
     }
   };
 
-  const loadComments = async () => {
-    if (!showComments) {
-      setShowComments(true);
-      if (comments.length === 0) {
-        setIsLoadingComments(true);
-        try {
-          const response = await commentService.getComments(post.id);
-          setComments(response.data || response);
-        } catch (error) {
-          toast.error('Failed to load comments.');
-        } finally {
-          setIsLoadingComments(false);
-        }
-      }
-    } else {
-      setShowComments(false);
+  // 💬 Fetch comments
+  const fetchComments = async () => {
+    setIsLoadingComments(true);
+
+    try {
+      const response = await commentService.getComments(post.id);
+
+      // normalize response (important 🔥)
+      const data =
+        response?.data?.data ||
+        response?.data ||
+        response?.comments ||
+        response;
+
+      setComments(Array.isArray(data) ? data : []);
+    } catch (error) {
+      toast.error('Failed to load comments.');
+      setComments([]); // safety fallback
+    } finally {
+      setIsLoadingComments(false);
     }
   };
 
+  // 💬 Toggle comments
+  const loadComments = async () => {
+    if (showComments) {
+      setShowComments(false);
+      return;
+    }
+
+    setShowComments(true);
+
+    if (comments.length === 0) {
+      await fetchComments();
+    }
+  };
+
+  // ✍️ Post comment
   const handlePostComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+
+    if (!newComment.trim() || isSubmittingComment) return;
 
     setIsSubmittingComment(true);
+
+    // optimistic comment
+    const tempComment = {
+      id: Date.now(),
+      content: newComment,
+      user: currentUser,
+    };
+
+    setComments(prev => [tempComment, ...prev]);
+    setNewComment('');
+
     try {
       const response = await commentService.createComment(post.id, newComment);
-      const addedComment = response.data || response;
-      setComments([addedComment, ...comments]);
-      setNewComment('');
+
+      const realComment = response;
+
+      setComments(prev =>
+        prev.map(c => (c.id === tempComment.id ? realComment : c))
+      );
+
       toast.success('Comment posted!');
     } catch (error) {
+      setComments(prev => prev.filter(c => c.id !== tempComment.id));
       toast.error('Failed to post comment.');
     } finally {
       setIsSubmittingComment(false);
@@ -80,143 +124,150 @@ export default function MemoryCard({ post }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-5 mb-6 overflow-hidden glass-panel rounded-3xl"
+      whileHover={{ y: -6, boxShadow: '0 18px 50px rgba(61, 43, 31, 0.13)' }}
+      transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+      className="p-5 mb-6 glass-panel rounded-3xl"
     >
-      {/* Post Header */}
+
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <img 
-            src={post.user?.avatar || 'https://ui-avatars.com/api/?name=' + post.user?.name} 
-            alt={post.user?.name} 
-            className="object-cover w-12 h-12 border-2 border-white rounded-full shadow-sm"
+          <img
+            src={
+              post.user?.avatar ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user?.name || '')}`
+            }
+            className="object-cover w-12 h-12 rounded-full"
           />
           <div>
-            <h3 className="font-semibold text-memory-text">{post.user?.name}</h3>
-            <p className="text-xs text-memory-muted">
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+            <h3 className="font-semibold">{post.user?.name}</h3>
+            <p className="text-xs text-gray-500">
+              {post.created_at &&
+                formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
             </p>
           </div>
         </div>
-        <button className="p-2 transition-colors text-memory-muted hover:text-memory-text">
-          <FiMoreHorizontal className="w-5 h-5" />
-        </button>
+
+        <motion.button whileHover={{ rotate: 90, scale: 1.08 }} whileTap={{ scale: 0.9 }} className="p-2 text-gray-500 rounded-full hover:bg-white">
+          <FiMoreHorizontal />
+        </motion.button>
       </div>
 
-      {/* Post Content */}
-      <div className="mb-4">
-        <p className="whitespace-pre-wrap text-memory-text leading-relaxed">{post.content}</p>
-      </div>
+      {/* Content */}
+      <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
 
-      {/* Post Media */}
-      {post.media && post.media.length > 0 && (
-        <div className={`grid gap-2 mb-4 ${post.media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-          {post.media.map((item, index) => (
-            <div 
-              key={index} 
-              className={`relative rounded-2xl overflow-hidden shadow-sm ${post.media.length === 1 ? 'aspect-video' : 'aspect-square'}`}
-            >
-              <img 
-                src={item.url} 
-                alt="Memory media" 
-                className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-              />
-            </div>
+      {/* Media */}
+      {post.media?.length > 0 && (
+        <div className="grid gap-2 mb-4">
+          {post.media.map((item) => (
+            <img
+              key={item.id}
+              src={item.file_path}
+              className="object-cover w-full rounded-xl"
+            />
           ))}
         </div>
       )}
 
-      {/* Post Actions */}
-      <div className="flex items-center justify-between py-3 border-t border-memory-border">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={handleToggleReaction}
-            className={`flex items-center gap-2 transition-colors ${myReaction ? 'text-memory-danger' : 'text-memory-muted hover:text-memory-danger'}`}
-          >
-            <motion.div whileTap={{ scale: 0.8 }}>
-              <FiHeart className={`w-5 h-5 ${myReaction ? 'fill-current' : ''}`} />
-            </motion.div>
-            <span className="text-sm font-medium">{reactionsCount}</span>
-          </button>
-          
-          <button 
-            onClick={loadComments}
-            className="flex items-center gap-2 transition-colors text-memory-muted hover:text-memory-text"
-          >
-            <FiMessageCircle className="w-5 h-5" />
-            <span className="text-sm font-medium">{post.comments_count}</span>
-          </button>
-        </div>
-        
-        <button className="transition-colors text-memory-muted hover:text-amber-warm">
-          <FiShare2 className="w-5 h-5" />
-        </button>
+      {/* Actions */}
+      <div className="flex items-center justify-between pt-3 border-t">
+
+        {/* Reaction */}
+        <motion.button
+          onClick={handleToggleReaction}
+          whileHover={{ scale: 1.08, y: -2 }}
+          whileTap={{ scale: 0.9 }}
+          className={`flex items-center gap-2 ${myReaction ? 'text-red-500' : 'text-gray-500'
+            } relative`}
+        >
+          <motion.span animate={myReaction ? { scale: [1, 1.35, 1] } : { scale: 1 }} transition={{ duration: 0.35 }} className="relative">
+            <FiHeart className={myReaction ? 'fill-current' : ''} />
+            <AnimatePresence>
+              {heartBurst && (
+                <motion.span
+                  className="absolute inset-0 rounded-full bg-red-400/30"
+                  initial={{ scale: 0.4, opacity: 0.9 }}
+                  animate={{ scale: 2.6, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                />
+              )}
+            </AnimatePresence>
+          </motion.span>
+          <motion.span key={reactionsCount} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            {reactionsCount}
+          </motion.span>
+        </motion.button>
+
+        {/* Comments */}
+        <motion.button
+          onClick={loadComments}
+          whileHover={{ scale: 1.08, y: -2 }}
+          whileTap={{ scale: 0.9 }}
+          className="flex items-center gap-2 text-gray-500"
+        >
+          <FiMessageCircle />
+          {post.comments_count}
+        </motion.button>
+
+        <motion.button whileHover={{ x: 4, y: -2, scale: 1.08 }} whileTap={{ scale: 0.9 }} className="p-2 text-gray-500 rounded-full hover:bg-white">
+          <FiShare2 />
+        </motion.button>
       </div>
 
-      {/* Comments Section */}
+      {/* Comments */}
       <AnimatePresence>
         {showComments && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
+            className="mt-4"
           >
-            <div className="pt-4 space-y-4 border-t border-memory-border">
-              {isLoadingComments ? (
-                <div className="py-4 text-center">
-                  <div className="w-6 h-6 border-2 border-amber-warm border-t-transparent rounded-full animate-spin mx-auto"></div>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
-                    {comments.map(comment => (
-                      <div key={comment.id} className="flex gap-3">
-                        <img 
-                          src={comment.user?.avatar || 'https://ui-avatars.com/api/?name=' + comment.user?.name} 
-                          alt="" 
-                          className="object-cover w-8 h-8 rounded-full border border-memory-border" 
-                        />
-                        <div className="flex-1 p-3 bg-cream-50/50 rounded-2xl border border-memory-border/50">
-                          <p className="text-xs font-bold text-memory-text">{comment.user?.name}</p>
-                          <p className="mt-1 text-sm text-memory-text">{comment.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                    {comments.length === 0 && (
-                      <p className="text-center text-xs text-memory-muted py-2">No comments yet. Be the first to reply!</p>
-                    )}
-                  </div>
-                  
-                  <form onSubmit={handlePostComment} className="flex items-center gap-3 mt-4">
-                    <img 
-                      src={currentUser?.avatar || 'https://ui-avatars.com/api/?name=' + currentUser?.name} 
-                      alt="" 
-                      className="object-cover w-8 h-8 rounded-full border border-memory-border" 
+
+            {isLoadingComments ? (
+              <p>Loading...</p>
+            ) : (
+              <div className="space-y-3 overflow-y-auto max-h-60">
+
+                {comments.map(comment => (
+                  <motion.div key={comment.id} className="flex gap-2" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}>
+                    <img
+                      src={
+                        comment.user?.avatar ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user?.name || '')}`
+                      }
+                      className="w-8 h-8 rounded-full"
                     />
-                    <div className="relative flex-1">
-                      <input 
-                        type="text" 
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Write a comment..." 
-                        className="w-full py-2.5 pl-4 pr-10 text-sm transition-all bg-white border rounded-full border-memory-border focus:outline-none focus:ring-2 focus:ring-amber-warm/30 focus:border-amber-warm"
-                      />
-                      <button 
-                        type="submit"
-                        disabled={isSubmittingComment || !newComment.trim()}
-                        className="absolute -translate-y-1/2 right-3 top-1/2 text-amber-warm hover:text-amber-deep disabled:text-memory-muted transition-colors"
-                      >
-                        {isSubmittingComment ? (
-                          <div className="w-4 h-4 border-2 border-amber-warm border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <FiSend className="w-4 h-4" />
-                        )}
-                      </button>
+                    <div className="p-2 text-sm bg-gray-100 rounded-xl">
+                      <b>{comment.user?.name}</b>
+                      <p>{comment.content}</p>
                     </div>
-                  </form>
-                </>
-              )}
-            </div>
+                  </motion.div>
+                ))}
+
+              </div>
+            )}
+
+            {/* Add comment */}
+            <form onSubmit={handlePostComment} className="flex gap-2 mt-3">
+              <input
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Write a comment..."
+                className="flex-1 px-3 py-2 text-sm border rounded-full"
+              />
+
+              <motion.button
+                disabled={isSubmittingComment}
+                className="text-amber-600"
+                whileHover={{ scale: 1.12, x: 2 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                {isSubmittingComment ? '...' : <FiSend />}
+              </motion.button>
+            </form>
+
           </motion.div>
         )}
       </AnimatePresence>

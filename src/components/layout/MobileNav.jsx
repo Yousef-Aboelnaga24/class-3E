@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FiHome, FiImage, FiClock, FiUsers, FiMessageSquare, FiPlusSquare } from 'react-icons/fi';
+import { FiHome, FiImage, FiClock, FiMessageSquare, FiPlusSquare, FiShield } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../auth/AuthContext';
 
 const navItems = [
   { path: '/', icon: FiHome },
@@ -12,10 +13,20 @@ const navItems = [
 
 export default function MobileNav() {
   const location = useLocation();
+  const { user } = useAuth();
+  const role = String(user?.role || 'user').toLowerCase();
+  const canCreate = role === 'student' || role === 'admin';
+  const visibleNavItems = [
+    navItems[0],
+    navItems[1],
+    ...(canCreate ? [navItems[2]] : []),
+    navItems[3],
+    role === 'admin' ? { path: '/admin', icon: FiShield } : navItems[4],
+  ];
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl border-t border-memory-border z-40 px-6 py-4 pb-safe flex items-center justify-between shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
-      {navItems.map((item) => {
+      {visibleNavItems.map((item) => {
         const isActive = location.pathname === item.path;
         const Icon = item.icon;
         

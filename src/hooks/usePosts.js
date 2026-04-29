@@ -47,3 +47,18 @@ export function useDeletePost() {
         },
     });
 }
+
+export function useUpdatePost() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }) => postService.updatePost(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+            toast.success('Memory updated.');
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to update memory.');
+        },
+    });
+}

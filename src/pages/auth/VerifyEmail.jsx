@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
 import authService from '../../services/authService';
-import PageTransition from '../../components/layout/PageTransition';
+import {PageTransition} from '../../components/layout/PageTransition';
 
 export default function VerifyEmail() {
     const [isResending, setIsResending] = useState(false);
@@ -42,19 +42,19 @@ export default function VerifyEmail() {
 
     return (
         <PageTransition>
-            <div className="min-h-screen flex items-center justify-center bg-cream-50 relative overflow-hidden px-4">
-                <div className="w-full max-w-md z-10 text-center">
+            <div className="relative flex items-center justify-center min-h-screen px-4 overflow-hidden bg-cream-50">
+                <div className="z-10 w-full max-w-md text-center">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="glass-panel rounded-3xl p-8 shadow-warm"
+                        className="p-8 glass-panel rounded-3xl shadow-warm"
                     >
-                        <div className="w-20 h-20 mx-auto bg-amber-100 rounded-full flex items-center justify-center mb-6 text-amber-600">
+                        <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-amber-100 text-amber-600">
                             <FiMail className="w-10 h-10" />
                         </div>
                         
-                        <h1 className="text-3xl font-display font-bold text-memory-text mb-4">Verify Your Email</h1>
-                        <p className="text-memory-muted mb-8">
+                        <h1 className="mb-4 text-3xl font-bold font-display text-memory-text">Verify Your Email</h1>
+                        <p className="mb-8 text-memory-muted">
                             We've sent a verification link to <span className="font-semibold text-memory-text">{user?.email}</span>. 
                             Please click the link in the email to verify your account.
                         </p>
@@ -62,7 +62,7 @@ export default function VerifyEmail() {
                         <div className="space-y-4">
                             <button
                                 onClick={handleCheckStatus}
-                                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+                                className="flex items-center justify-center w-full gap-2 py-3 btn-primary"
                             >
                                 <span>I've Verified My Email</span>
                             </button>
@@ -70,7 +70,7 @@ export default function VerifyEmail() {
                             <button
                                 onClick={handleResend}
                                 disabled={isResending}
-                                className="w-full py-3 text-amber-deep font-medium hover:text-amber-warm transition-colors flex items-center justify-center gap-2"
+                                className="flex items-center justify-center w-full gap-2 py-3 font-medium transition-colors text-amber-deep hover:text-amber-warm"
                             >
                                 {isResending ? (
                                     <FiRefreshCw className="animate-spin" />
@@ -81,10 +81,10 @@ export default function VerifyEmail() {
                             </button>
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-memory-border">
+                        <div className="pt-6 mt-8 border-t border-memory-border">
                             <button
                                 onClick={logout}
-                                className="text-memory-muted hover:text-memory-text transition-colors flex items-center justify-center gap-2 mx-auto"
+                                className="flex items-center justify-center gap-2 mx-auto transition-colors text-memory-muted hover:text-memory-text"
                             >
                                 <FiArrowLeft />
                                 <span>Back to Login</span>

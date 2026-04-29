@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
-import PageTransition from '../../components/layout/PageTransition';
+import {PageTransition} from '../../components/layout/PageTransition';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -48,22 +48,22 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex items-center justify-center bg-cream-50 relative overflow-hidden px-4 sm:px-6">
+      <div className="relative flex items-center justify-center min-h-screen px-4 overflow-hidden bg-cream-50 sm:px-6">
         {/* Background decorative elements */}
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-amber-warm/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" />
         <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-sky-soft/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{ animationDelay: '1s' }} />
 
-        <div className="w-full max-w-md z-10">
+        <div className="z-10 w-full max-w-md">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8"
+            className="mb-8 text-center"
           >
-            <div className="w-20 h-20 mx-auto bg-amber-gradient rounded-3xl shadow-warm flex items-center justify-center mb-6 transform rotate-12 hover:rotate-0 transition-transform duration-300">
-              <span className="text-white font-display font-bold text-3xl">3E</span>
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 transition-transform duration-300 transform bg-amber-gradient rounded-3xl shadow-warm rotate-12 hover:rotate-0">
+              <span className="text-3xl font-bold text-white font-display">3E</span>
             </div>
-            <h1 className="text-4xl font-display font-bold text-memory-text mb-2">Welcome Back</h1>
+            <h1 className="mb-2 text-4xl font-bold font-display text-memory-text">Welcome Back</h1>
             <p className="text-memory-muted">Relive the beautiful moments we shared.</p>
           </motion.div>
 
@@ -71,13 +71,13 @@ export default function Login() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="glass-panel rounded-3xl p-8"
+            className="p-8 glass-panel rounded-3xl"
           >
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-memory-text mb-2 ml-1">Email</label>
+                <label className="block mb-2 ml-1 text-sm font-medium text-memory-text">Email</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                     <FiMail className="text-memory-muted" />
                   </div>
                   <input
@@ -88,16 +88,16 @@ export default function Login() {
                   />
                 </div>
                 {errors.email && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 text-sm text-memory-danger ml-1">
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 ml-1 text-sm text-memory-danger">
                     {errors.email.message}
                   </motion.p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-memory-text mb-2 ml-1">Password</label>
+                <label className="block mb-2 ml-1 text-sm font-medium text-memory-text">Password</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                     <FiLock className="text-memory-muted" />
                   </div>
                   <input
@@ -108,7 +108,7 @@ export default function Login() {
                   />
                 </div>
                 {errors.password && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 text-sm text-memory-danger ml-1">
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 ml-1 text-sm text-memory-danger">
                     {errors.password.message}
                   </motion.p>
                 )}
@@ -120,14 +120,14 @@ export default function Login() {
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-amber-warm focus:ring-amber-warm border-memory-border rounded"
+                    className="w-4 h-4 rounded text-amber-warm focus:ring-amber-warm border-memory-border"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-memory-muted">
+                  <label htmlFor="remember-me" className="block ml-2 text-sm text-memory-muted">
                     Remember me
                   </label>
                 </div>
                 <div className="text-sm">
-                  <a href="#" className="font-medium text-amber-deep hover:text-amber-warm transition-colors">
+                  <a href="#" className="font-medium transition-colors text-amber-deep hover:text-amber-warm">
                     Forgot password?
                   </a>
                 </div>
@@ -139,7 +139,7 @@ export default function Login() {
                 className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 text-lg"
               >
                 {isLoading ? (
-                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-white rounded-full border-t-transparent animate-spin" />
                 ) : (
                   <>
                     <span>Sign In</span>
@@ -149,9 +149,9 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="mt-8 text-center text-sm text-memory-muted">
+            <div className="mt-8 text-sm text-center text-memory-muted">
               Don't have an account yet?{' '}
-              <Link to="/register" className="font-medium text-amber-deep hover:text-amber-warm transition-colors">
+              <Link to="/register" className="font-medium transition-colors text-amber-deep hover:text-amber-warm">
                 Join the class
               </Link>
             </div>

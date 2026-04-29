@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
-import PageTransition from '../../components/layout/PageTransition';
+import {PageTransition} from '../../components/layout/PageTransition';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
