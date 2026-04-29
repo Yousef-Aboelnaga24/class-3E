@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream-50 text-memory-text font-body antialiased selection:bg-amber-warm selection:text-white min-h-screen overflow-x-hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-memory-text;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-card;
+  }
+  
+  .btn-primary {
+    @apply bg-amber-gradient text-white px-6 py-2.5 rounded-full font-medium shadow-warm hover:shadow-memory transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-memory-text px-6 py-2.5 rounded-full font-medium shadow-card hover:shadow-card-hover transition-all hover:-translate-y-0.5 border border-memory-border active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0;
+  }
+  
+  .input-field {
+    @apply w-full bg-white border border-memory-border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-warm/50 focus:border-amber-warm transition-all text-memory-text placeholder:text-memory-muted;
+  }
+}
+
+/* Custom Scrollbar for a more elegant look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
+}
