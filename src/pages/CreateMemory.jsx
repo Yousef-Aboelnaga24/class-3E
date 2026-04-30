@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useDropzone } from 'react-dropzone';
@@ -28,14 +28,14 @@ export default function CreateMemory() {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(createMemorySchema),
     defaultValues: { content: '' }
   });
 
-  const contentValue = watch('content');
+  const contentValue = useWatch({ control, name: 'content' }) || '';
   const role = String(user?.role || 'user').toLowerCase();
   const canCreate = role === 'student' || role === 'admin';
 
@@ -83,7 +83,7 @@ export default function CreateMemory() {
 
       await createPost(formData);
       navigate('/');
-    } catch (error) {
+    } catch {
       // toast is handled by useCreatePost
     } finally {
       setIsSubmitting(false);

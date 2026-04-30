@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiMail, FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
 import authService from '../../services/authService';
@@ -35,7 +35,7 @@ export default function VerifyEmail() {
             } else {
                 toast.error('Email not verified yet. Please check your inbox.');
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to check status.');
         }
     };

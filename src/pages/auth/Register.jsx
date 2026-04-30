@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
-import toast from 'react-hot-toast';
 import { useAuth } from '../../auth/AuthContext';
 import {PageTransition} from '../../components/layout/PageTransition';
 

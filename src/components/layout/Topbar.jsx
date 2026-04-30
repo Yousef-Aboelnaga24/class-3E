@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   RiSearchLine, RiNotification3Line, RiAddCircleLine,
   RiHome4Line, RiImageLine, RiTimeLine, RiGroupLine, RiLockPasswordLine,
-  RiMenuLine, RiCloseLine, RiUserLine, RiLogoutBoxLine,
+  RiMenuLine, RiCloseLine, RiLogoutBoxLine,
 } from 'react-icons/ri'
 import { useAuth } from '../../auth/AuthContext'
 import Avatar from '../ui/Avatar'

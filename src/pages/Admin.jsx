@@ -22,14 +22,13 @@ export default function Admin() {
   const { data: usersData, isLoading } = useUsers();
   const updateUserRole = useUpdateUserRole();
 
-  const users = usersData?.data || usersData || [];
-
   const filteredUsers = useMemo(() => {
+    const users = usersData?.data || usersData || [];
     const search = userSearch.toLowerCase();
     return users.filter((u) =>
       `${u.name} ${u.email} ${u.role}`.toLowerCase().includes(search)
     );
-  }, [users, userSearch]);
+  }, [usersData, userSearch]);
 
   if (!isAdmin) return <Navigate to="/" replace />;
 

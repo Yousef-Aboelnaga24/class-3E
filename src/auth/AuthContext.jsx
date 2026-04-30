@@ -7,7 +7,6 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isVerified, setIsVerified] = useState(true);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -92,6 +91,7 @@ export function AuthProvider({ children }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const context = useContext(AuthContext);
     if (!context) {

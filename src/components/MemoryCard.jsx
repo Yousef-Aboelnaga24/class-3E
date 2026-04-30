@@ -40,7 +40,7 @@ export default function MemoryCard({ post }) {
 
     try {
       await reactionService.toggleReaction(post.id, 'like');
-    } catch (error) {
+    } catch {
       setMyReaction(previousReaction);
       setReactionsCount(previousCount);
       toast.error('Failed to update reaction.');
@@ -62,7 +62,7 @@ export default function MemoryCard({ post }) {
         response;
 
       setComments(Array.isArray(data) ? data : []);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load comments.');
       setComments([]); // safety fallback
     } finally {
@@ -94,7 +94,7 @@ export default function MemoryCard({ post }) {
 
     // optimistic comment
     const tempComment = {
-      id: Date.now(),
+      id: `temp-${post.id}-${comments.length + 1}`,
       content: newComment,
       user: currentUser,
     };
@@ -112,7 +112,7 @@ export default function MemoryCard({ post }) {
       );
 
       toast.success('Comment posted!');
-    } catch (error) {
+    } catch {
       setComments(prev => prev.filter(c => c.id !== tempComment.id));
       toast.error('Failed to post comment.');
     } finally {
@@ -159,13 +159,23 @@ export default function MemoryCard({ post }) {
       {/* Media */}
       {post.media?.length > 0 && (
         <div className="grid gap-2 mb-4">
-          {post.media.map((item) => (
-            <img
-              key={item.id}
-              src={item.file_path}
-              className="object-cover w-full rounded-xl"
-            />
-          ))}
+          {post.media.map((item) => {
+            const isVideo = item.file_path.endsWith(".mp4");
+
+            return isVideo ? (
+              <video key={item.id} controls className="w-full rounded-xl">
+                <source src={item.file_path} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img
+                key={item.id}
+                src={item.file_path}
+                className="object-cover w-full rounded-xl"
+                alt="post media"
+              />
+            );
+          })}
         </div>
       )}
 

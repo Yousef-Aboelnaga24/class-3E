@@ -1,6 +1,21 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import userService from '../services/userService';
+
+function getNextPageParam(lastPage) {
+    const payload = lastPage?.data || lastPage;
+    const meta = payload?.meta || payload;
+
+    if (meta?.current_page && meta?.last_page && meta.current_page < meta.last_page) {
+        return meta.current_page + 1;
+    }
+
+    if (payload?.next_page_url || meta?.next_page_url) {
+        return (meta?.current_page || payload?.current_page || 1) + 1;
+    }
+
+    return undefined;
+}
 
 export function useUsers() {
     return useQuery({
@@ -18,9 +33,11 @@ export function useUser(id) {
 }
 
 export function useUserPosts(id, page = 1) {
-    return useQuery({
+    return useInfiniteQuery({
         queryKey: ['userPosts', id, page],
-        queryFn: () => userService.getUserPosts(id, page),
+        queryFn: ({ pageParam = page }) => userService.getUserPosts(id, pageParam),
+        initialPageParam: page,
+        getNextPageParam,
         enabled: !!id,
     });
 }
@@ -32,12 +49,14 @@ export function useUpdateProfile() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: userService.updateProfile,
+        mutationFn: ({ formData }) => userService.updateProfile(formData),
 
         onSuccess: (res) => {
             const user = res?.data || res;
 
-            queryClient.setQueryData(['user', user.id], user);
+            if (user?.id) {
+                queryClient.setQueryData(['user', user.id], user);
+            }
 
             toast.success('Profile updated successfully');
         },
@@ -61,7 +80,7 @@ export function useUpdateUserRole() {
             userService.updateUserRole(id, role),
 
         onMutate: async ({ id, role }) => {
-            await queryClient.cancelQueries(['users']);
+            await queryClient.cancelQueries({ queryKey: ['users'] });
 
             const previousUsers = queryClient.getQueryData(['users']);
 
@@ -95,7 +114,7 @@ export function useUpdateUserRole() {
         },
 
         onSettled: () => {
-            queryClient.invalidateQueries(['users']);
+            queryClient.invalidateQueries({ queryKey: ['users'] });
         },
     });
 }

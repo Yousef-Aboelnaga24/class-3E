@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
+import ErrorBoundary from './components/ErrorBoundary'
 import AppLayout from './components/layout/AppLayout'
 
 // Pages
@@ -29,65 +30,67 @@ const queryClient = new QueryClient({
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Auth routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route 
-              path="/verify-email" 
-              element={
-                <ProtectedRoute requireVerification={false}>
-                  <VerifyEmail />
-                </ProtectedRoute>
-              } 
-            />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Auth routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/verify-email"
+                element={
+                  <ProtectedRoute requireVerification={false}>
+                    <VerifyEmail />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Protected routes inside app layout */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/" element={<Home />} />
-              <Route path="/create" element={<CreateMemory />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/timeline" element={<Timeline />} />
-              <Route path="/members" element={<Members />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/confessions" element={<Confessions />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+              {/* Protected routes inside app layout */}
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="/" element={<Home />} />
+                <Route path="/create" element={<CreateMemory />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/timeline" element={<Timeline />} />
+                <Route path="/members" element={<Members />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route path="/confessions" element={<Confessions />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
 
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#FFFFFF',
-              color: '#3D2B1F',
-              border: '1px solid #F0E6D3',
-              borderRadius: '14px',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '14px',
-              boxShadow: '0 8px 32px rgba(61, 43, 31, 0.14)',
-            },
-            success: {
-              iconTheme: { primary: '#F4A261', secondary: '#fff' },
-            },
-            error: {
-              iconTheme: { primary: '#E76F51', secondary: '#fff' },
-            },
-          }}
-        />
-      </AuthProvider>
-    </QueryClientProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#FFFFFF',
+                color: '#3D2B1F',
+                border: '1px solid #F0E6D3',
+                borderRadius: '14px',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '14px',
+                boxShadow: '0 8px 32px rgba(61, 43, 31, 0.14)',
+              },
+              success: {
+                iconTheme: { primary: '#F4A261', secondary: '#fff' },
+              },
+              error: {
+                iconTheme: { primary: '#E76F51', secondary: '#fff' },
+              },
+            }}
+          />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }

@@ -1,62 +1,47 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FiMessageSquare, FiSend, FiLock, FiGlobe } from 'react-icons/fi';
 import toast from 'react-hot-toast';
-import {PageTransition} from '../components/layout/PageTransition';
+import { PageTransition } from '../components/layout/PageTransition';
+import { useConfessions, useCreateConfession } from '../hooks/useConfessions';
 
 const confessionSchema = z.object({
   content: z.string().min(10, 'Confession must be at least 10 characters'),
-  isAnonymous: z.boolean(),
+  is_anonymous: z.boolean(),
 });
 
-const mockConfessions = [
-  { id: 1, content: "I was the one who accidentally broke the projector in sophomore year. Sorry Mr. Davis! 😅", isAnonymous: true, timestamp: "2 hours ago", color: "bg-confession-gradient" },
-  { id: 2, content: "To the person who always left notes in library book #402: you made my days brighter.", isAnonymous: true, timestamp: "5 hours ago", color: "bg-sky-gradient" },
-  { id: 3, content: "I'm finally going to art school! Thanks to everyone who supported my doodles during math class.", isAnonymous: false, author: "Emma W.", timestamp: "1 day ago", color: "bg-sage-gradient" },
-  { id: 4, content: "Does anyone else miss the cafeteria's weird Tuesday tacos? Just me?", isAnonymous: true, timestamp: "2 days ago", color: "bg-amber-gradient" },
-];
-
 export default function Confessions() {
-  const [confessions, setConfessions] = useState(mockConfessions);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: confessionsData, isLoading } = useConfessions();
+  const createConfession = useCreateConfession();
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
+    setValue,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(confessionSchema),
-    defaultValues: { isAnonymous: true, content: '' }
+    defaultValues: { is_anonymous: true, content: '' }
   });
 
-  const isAnonymous = watch('isAnonymous');
+  const isAnonymous = useWatch({ control, name: 'is_anonymous' });
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const newConfession = {
-        id: Date.now(),
-        content: data.content,
-        isAnonymous: data.isAnonymous,
-        author: data.isAnonymous ? null : "Demo User",
-        timestamp: "Just now",
-        color: "bg-confession-gradient"
-      };
-      setConfessions([newConfession, ...confessions]);
-      toast.success('Your secret is safe with us! 🤫');
-      reset();
-    } catch (error) {
-      toast.error('Failed to post confession.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    createConfession.mutate({
+      content: data.content,
+      is_anonymous: data.is_anonymous,
+    }, {
+      onSuccess: () => {
+        reset();
+      },
+    });
   };
+
+  const confessions = confessionsData?.data || [];
 
   return (
     <PageTransition>
@@ -96,7 +81,7 @@ export default function Confessions() {
                 <div className="flex items-center p-1 border rounded-full bg-white/50 border-memory-border">
                   <button
                     type="button"
-                    onClick={() => reset({ ...watch(), isAnonymous: true })}
+                    onClick={() => setValue('is_anonymous', true)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${isAnonymous ? 'bg-amber-warm text-white shadow-sm' : 'text-memory-muted hover:text-memory-text'
                       }`}
                   >
@@ -104,7 +89,7 @@ export default function Confessions() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => reset({ ...watch(), isAnonymous: false })}
+                    onClick={() => setValue('is_anonymous', false)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${!isAnonymous ? 'bg-amber-warm text-white shadow-sm' : 'text-memory-muted hover:text-memory-text'
                       }`}
                   >
@@ -114,10 +99,10 @@ export default function Confessions() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={createConfession.isPending}
                   className="flex items-center gap-2 btn-primary"
                 >
-                  {isSubmitting ? (
+                  {createConfession.isPending ? (
                     <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin" />
                   ) : (
                     <>
@@ -132,31 +117,45 @@ export default function Confessions() {
 
         {/* Masonry Wall */}
         <div className="gap-6 space-y-6 columns-1 sm:columns-2 lg:columns-3">
-          <AnimatePresence>
-            {confessions.map((confession, index) => (
-              <motion.div
-                key={confession.id}
-                layout
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className={`break-inside-avoid p-6 rounded-3xl text-white shadow-lg ${confession.color} relative overflow-hidden group`}
-              >
-                {/* Decorative quote mark */}
-                <span className="absolute font-serif leading-none -top-4 -right-2 text-8xl opacity-20">"</span>
+          {isLoading ? (
+            <div className="space-y-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-48 p-6 rounded-3xl bg-cream-200 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <AnimatePresence>
+              {confessions.length > 0 ? (
+                confessions.map((confession, index) => (
+                  <motion.div
+                    key={confession.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    className={`break-inside-avoid p-6 rounded-3xl text-white shadow-lg ${confession.color} relative overflow-hidden group`}
+                  >
+                    {/* Decorative quote mark */}
+                    <span className="absolute font-serif leading-none -top-4 -right-2 text-8xl opacity-20">"</span>
 
-                <p className="relative z-10 mb-6 text-lg font-medium leading-relaxed">
-                  {confession.content}
-                </p>
+                    <p className="relative z-10 mb-6 text-lg font-medium leading-relaxed">
+                      {confession.content}
+                    </p>
 
-                <div className="relative z-10 flex items-center justify-between text-sm font-medium text-white/80">
-                  <span>{confession.isAnonymous ? 'Anonymous' : confession.author}</span>
-                  <span>{confession.timestamp}</span>
+                    <div className="relative z-10 flex items-center justify-between text-sm font-medium text-white/80">
+                      <span>{confession.is_anonymous ? 'Anonymous' : confession.author}</span>
+                      <span>{confession.timestamp}</span>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="py-12 text-center col-span-full">
+                  <p className="text-memory-muted">No confessions yet. Be the first to share!</p>
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              )}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </PageTransition>

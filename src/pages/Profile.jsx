@@ -64,7 +64,13 @@ function extractCollection(page) {
 }
 
 function getAvatar(name, avatar) {
-  return avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Memory Wall')}&background=F4A261&color=fff`;
+  if (typeof avatar === 'string' && avatar.trim().length > 0) {
+    return avatar;
+  }
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    name || 'User'
+  )}&background=F4A261&color=fff`;
 }
 
 function AnimatedCounter({ value }) {
@@ -99,17 +105,10 @@ function ProfileSkeleton() {
 
 function EditProfileModal({ isOpen, onClose, user, profileId, onSaved }) {
   const updateUser = useUpdateProfile();
-  const [form, setForm] = useState({ name: '', bio: '' });
+  const [form, setForm] = useState({ name: user?.name || '', bio: user?.bio || '' });
   const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState('');
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatar || '');
   const [showSuccess, setShowSuccess] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    setForm({ name: user.name || '', bio: user.bio || '' });
-    setAvatarPreview(user.avatar || '');
-    setAvatarFile(null);
-  }, [user, isOpen]);
 
   useEffect(() => {
     return () => {
@@ -134,9 +133,10 @@ function EditProfileModal({ isOpen, onClose, user, profileId, onSaved }) {
     if (avatarFile) formData.append('avatar', avatarFile);
 
     const optimisticUser = {
+      id: profileId,
       name: form.name,
       bio: form.bio,
-      avatar: avatarPreview || user.avatar,
+      avatar: avatarPreview || user?.avatar,
     };
 
     const response = await updateUser.mutateAsync({ id: profileId, formData, optimisticUser });
@@ -448,15 +448,17 @@ export default function Profile() {
           </motion.div>
         )}
 
-        <EditProfileModal
-          isOpen={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
-          user={user}
-          profileId={profileId}
-          onSaved={(updatedUser) => {
-            if (isOwner) setUser((prev) => ({ ...prev, ...updatedUser }));
-          }}
-        />
+        {isEditOpen && (
+          <EditProfileModal
+            isOpen={isEditOpen}
+            onClose={() => setIsEditOpen(false)}
+            user={user}
+            profileId={profileId}
+            onSaved={(updatedUser) => {
+              if (isOwner) setUser((prev) => ({ ...prev, ...updatedUser }));
+            }}
+          />
+        )}
       </div>
     </PageTransition>
   );

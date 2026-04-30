@@ -2,27 +2,33 @@ import axiosClient from '../api/axiosClient';
 
 const authService = {
     async register(data) {
-        return await axiosClient.post('/register', data);
+        const res = await axiosClient.post('/register', data);
+        return res;
     },
 
     async login(data) {
-        return await axiosClient.post('/login', data);
+        const res = await axiosClient.post('/login', data);
+        return res;
     },
 
     async logout() {
-        return await axiosClient.post('/logout');
+        const res = await axiosClient.post('/logout');
+        return res;
     },
 
     async getCurrentUser() {
-        return await axiosClient.get('/user');
+        const res = await axiosClient.get('/user');
+        return res;
     },
 
-    async verifyEmail(id, hash) {
-        return await axiosClient.get(`/email/verify/${id}/${hash}`);
+    async verifyEmail(id) {
+        const res = await axiosClient.get(`/email/verify/${id}`);
+        return res;
     },
 
     async resendVerification() {
-        return await axiosClient.post('/email/resend');
+        const res = await axiosClient.post('/email/resend');
+        return res;
     },
 };
 

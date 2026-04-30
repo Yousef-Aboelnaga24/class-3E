@@ -13,16 +13,12 @@ const userService = {
         return await axiosClient.get(`/users/${id}/posts?page=${page}`);
     },
 
-    // ✏️ profile update (self only)
     async updateProfile(formData) {
         return await axiosClient.post('/profile', formData);
     },
 
-    // 👑 role update (admin only)
     async updateUserRole(id, role) {
-        return await axiosClient.post(`/users/${id}/role`, {
-            role,
-        });
+        return await axiosClient.post(`/users/${id}/role`, { role });
     },
 };
 
