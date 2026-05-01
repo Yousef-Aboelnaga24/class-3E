@@ -41,8 +41,8 @@ export default function Sidebar() {
               key={item.path}
               to={item.path}
               className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all relative ${isActive
-                  ? 'text-amber-warm font-semibold bg-amber-warm/10'
-                  : 'text-memory-muted hover:text-memory-text hover:bg-black/5'
+                ? 'text-amber-warm font-semibold bg-amber-warm/10'
+                : 'text-memory-muted hover:text-memory-text hover:bg-black/5'
                 }`}
             >
               <Icon className="w-5 h-5" />
@@ -93,6 +93,7 @@ export default function Sidebar() {
           </button>
         </div>
       </div>
+      {/* { console.log(user.avatar) } */}
     </div>
   );
 }

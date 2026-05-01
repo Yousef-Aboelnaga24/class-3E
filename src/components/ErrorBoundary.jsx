@@ -41,7 +41,7 @@ export default class ErrorBoundary extends React.Component {
                             We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
                         </p>
 
-                        {process.env.NODE_ENV === 'development' && this.state.error && (
+                        {import.meta.env.DEV && this.state.error && (
                             <div className="mb-6 p-4 bg-red-50 rounded-xl border border-red-200">
                                 <p className="text-xs text-red-700 font-mono break-words">
                                     {this.state.error.toString()}

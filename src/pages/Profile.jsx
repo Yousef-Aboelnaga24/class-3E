@@ -80,7 +80,8 @@ function AnimatedCounter({ value }) {
 
   useEffect(() => {
     spring.set(numericValue);
-    return spring.on('change', (latest) => setDisplay(Math.round(latest)));
+    const unsubscribe = spring.on('change', (latest) => setDisplay(Math.round(latest)));
+    return unsubscribe;
   }, [numericValue, spring]);
 
   return <span>{display.toLocaleString()}</span>;
@@ -109,12 +110,19 @@ function EditProfileModal({ isOpen, onClose, user, profileId, onSaved }) {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || '');
   const [showSuccess, setShowSuccess] = useState(false);
+  const closeTimerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       if (avatarPreview?.startsWith('blob:')) URL.revokeObjectURL(avatarPreview);
     };
   }, [avatarPreview]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   const handleFile = (event) => {
     const file = event.target.files?.[0];
@@ -139,14 +147,20 @@ function EditProfileModal({ isOpen, onClose, user, profileId, onSaved }) {
       avatar: avatarPreview || user?.avatar,
     };
 
-    const response = await updateUser.mutateAsync({ id: profileId, formData, optimisticUser });
-    setShowSuccess(true);
-    onSaved(response?.data || response || optimisticUser);
-    window.setTimeout(() => {
-      setShowSuccess(false);
-      onClose();
-    }, 850);
+    try {
+      const response = await updateUser.mutateAsync({ id: profileId, formData, optimisticUser });
+      setShowSuccess(true);
+      onSaved(response?.data || response || optimisticUser);
+
+      closeTimerRef.current = window.setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 850);
+    } catch {
+      // Mutation error is already displayed by toast, no additional handling required here.
+    }
   };
+
 
   return (
     <AnimatePresence>
@@ -460,6 +474,7 @@ export default function Profile() {
           />
         )}
       </div>
+      {/* {console.log(user.avatar)} */}
     </PageTransition>
   );
 }

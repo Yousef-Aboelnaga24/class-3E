@@ -3,7 +3,6 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FiMessageSquare, FiSend, FiLock, FiGlobe } from 'react-icons/fi';
-import toast from 'react-hot-toast';
 import { PageTransition } from '../components/layout/PageTransition';
 import { useConfessions, useCreateConfession } from '../hooks/useConfessions';
 
@@ -134,16 +133,16 @@ export default function Confessions() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className={`break-inside-avoid p-6 rounded-3xl text-white shadow-lg ${confession.color} relative overflow-hidden group`}
+                    className={`relative break-inside-avoid p-6 rounded-3xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${confession.color}`}
                   >
                     {/* Decorative quote mark */}
                     <span className="absolute font-serif leading-none -top-4 -right-2 text-8xl opacity-20">"</span>
 
-                    <p className="relative z-10 mb-6 text-lg font-medium leading-relaxed">
+                    <p className="relative z-10 mb-6 text-base font-medium leading-relaxed tracking-normal break-words whitespace-pre-wrap sm:text-lg text-black/90">
                       {confession.content}
                     </p>
 
-                    <div className="relative z-10 flex items-center justify-between text-sm font-medium text-white/80">
+                    <div className="relative z-10 flex items-center justify-between text-sm font-medium text-memory-muted">
                       <span>{confession.is_anonymous ? 'Anonymous' : confession.author}</span>
                       <span>{confession.timestamp}</span>
                     </div>

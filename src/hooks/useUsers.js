@@ -52,7 +52,7 @@ export function useUpdateProfile() {
         mutationFn: ({ formData }) => userService.updateProfile(formData),
 
         onSuccess: (res) => {
-            const user = res?.data || res;
+            const user = res?.user || res?.data?.user || res?.data || res;
 
             if (user?.id) {
                 queryClient.setQueryData(['user', user.id], user);
