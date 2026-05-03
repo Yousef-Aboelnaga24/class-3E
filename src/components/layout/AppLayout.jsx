@@ -4,11 +4,13 @@ import MobileNav from './MobileNav';
 
 export default function AppLayout() {
   return (
-    <div className="min-h-screen bg-cream-50 flex">
+    <div className="flex min-h-screen bg-app-surface">
       <Sidebar />
       
-      <main className="flex-1 md:ml-64 pb-24 md:pb-0 min-h-screen">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <main className="relative min-h-screen flex-1 overflow-hidden pb-24 md:ml-64 md:pb-0">
+        <div className="app-grid-lines pointer-events-none absolute inset-0 opacity-60" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[linear-gradient(180deg,rgba(124,58,237,0.22),transparent)]" />
+        <div className="relative z-10 mx-auto max-w-6xl px-4 py-6 sm:px-6 md:py-10 lg:px-8">
           <Outlet />
         </div>
       </main>

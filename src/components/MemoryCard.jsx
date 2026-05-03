@@ -1,15 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiHeart, FiMessageCircle, FiShare2, FiMoreHorizontal, FiSend } from 'react-icons/fi';
+import { FiCheck, FiEdit3, FiHeart, FiMessageCircle, FiMoreHorizontal, FiSend, FiShare2, FiTrash2, FiX } from 'react-icons/fi';
 import { useAuth } from '../auth/AuthContext';
 import reactionService from '../services/reactionService';
 import commentService from '../services/commentService';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
+import { useDeletePost, useUpdatePost } from '../hooks/usePosts';
+
+function isVideoFile(item) {
+  return item.file_path?.toLowerCase().endsWith('.mp4');
+}
+
+function mediaGridClass(count) {
+  if (count === 1) return 'grid-cols-1';
+  if (count === 2) return 'grid-cols-2';
+  return 'grid-cols-2 grid-rows-2';
+}
+
+function mediaTileClass(count, index) {
+  if (count === 1) return 'aspect-[16/10]';
+  if (count === 2) return 'aspect-[4/5]';
+  if (count === 3 && index === 0) return 'row-span-2 aspect-auto';
+  if (count >= 4 && index === 0) return 'row-span-2 aspect-auto';
+  return 'aspect-square';
+}
 
 export default function MemoryCard({ post }) {
   const { user: currentUser } = useAuth();
+  const deletePost = useDeletePost();
+  const updatePost = useUpdatePost();
 
+  const [content, setContent] = useState(post.content || '');
+  const [draftContent, setDraftContent] = useState(post.content || '');
+  const [isEditing, setIsEditing] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [myReaction, setMyReaction] = useState(post.my_reaction);
   const [reactionsCount, setReactionsCount] = useState(post.reactions_count);
   const [heartBurst, setHeartBurst] = useState(false);
@@ -20,6 +45,18 @@ export default function MemoryCard({ post }) {
 
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const currentRole = String(currentUser?.role || 'user').toLowerCase();
+  const isOwner = currentUser?.id && String(currentUser.id) === String(post.user?.id);
+  const isAdmin = currentRole === 'admin';
+  const canEdit = isOwner || isAdmin;
+  const canDelete = isOwner || isAdmin;
+
+  useEffect(() => {
+    setContent(post.content || '');
+    setDraftContent(post.content || '');
+    setIsEditing(false);
+    setShowMenu(false);
+  }, [post.id, post.content]);
 
   // ❤️ Reaction Toggle
   const handleToggleReaction = async () => {
@@ -120,6 +157,44 @@ export default function MemoryCard({ post }) {
     }
   };
 
+  const handleStartEdit = () => {
+    setDraftContent(content);
+    setIsEditing(true);
+    setShowMenu(false);
+  };
+
+  const handleCancelEdit = () => {
+    setDraftContent(content);
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async (event) => {
+    event.preventDefault();
+
+    const nextContent = draftContent.trim();
+    if (!nextContent) {
+      toast.error('Memory content cannot be empty.');
+      return;
+    }
+
+    try {
+      await updatePost.mutateAsync({
+        id: post.id,
+        data: { content: nextContent },
+      });
+      setContent(nextContent);
+      setIsEditing(false);
+    } catch {
+      // Mutation hook already shows the API error.
+    }
+  };
+
+  const handleDeletePost = () => {
+    setShowMenu(false);
+    if (!window.confirm('Delete this memory?')) return;
+    deletePost.mutate(post.id);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -148,32 +223,126 @@ export default function MemoryCard({ post }) {
           </div>
         </div>
 
-        <motion.button whileHover={{ rotate: 90, scale: 1.08 }} whileTap={{ scale: 0.9 }} className="p-2 text-gray-500 rounded-full hover:bg-white">
-          <FiMoreHorizontal />
-        </motion.button>
+        {(canEdit || canDelete) && (
+          <div className="relative">
+            <motion.button
+              type="button"
+              onClick={() => setShowMenu((value) => !value)}
+              whileHover={{ rotate: 90, scale: 1.08 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 text-gray-500 rounded-full hover:bg-white"
+              aria-label="Post actions"
+            >
+              <FiMoreHorizontal />
+            </motion.button>
+
+            <AnimatePresence>
+              {showMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                  className="absolute right-0 z-20 mt-2 w-36 overflow-hidden rounded-2xl border border-memory-border bg-white shadow-card"
+                >
+                  {canEdit && (
+                    <button
+                      type="button"
+                      onClick={handleStartEdit}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm font-semibold text-memory-text hover:bg-cream-50"
+                    >
+                      <FiEdit3 />
+                      Edit
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      type="button"
+                      onClick={handleDeletePost}
+                      disabled={deletePost.isPending}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm font-semibold text-memory-danger hover:bg-red-50"
+                    >
+                      <FiTrash2 />
+                      Delete
+                    </button>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
 
       {/* Content */}
-      <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
+      {isEditing ? (
+        <form onSubmit={handleSaveEdit} className="mb-4 space-y-3">
+          <textarea
+            value={draftContent}
+            onChange={(event) => setDraftContent(event.target.value)}
+            className="min-h-28 w-full resize-none rounded-2xl border border-memory-border bg-white/70 p-4 text-memory-text outline-none transition focus:border-amber-warm focus:ring-2 focus:ring-amber-warm/40"
+            autoFocus
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="inline-flex items-center gap-2 rounded-full border border-memory-border bg-white px-4 py-2 text-sm font-semibold text-memory-muted"
+            >
+              <FiX />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={updatePost.isPending}
+              className="inline-flex items-center gap-2 rounded-full bg-amber-gradient px-4 py-2 text-sm font-semibold text-white shadow-warm"
+            >
+              {updatePost.isPending ? (
+                <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              ) : (
+                <FiCheck />
+              )}
+              Save
+            </button>
+          </div>
+        </form>
+      ) : (
+        <p className="mb-4 whitespace-pre-wrap">{content}</p>
+      )}
 
       {/* Media */}
       {post.media?.length > 0 && (
-        <div className="grid gap-2 mb-4">
-          {post.media.map((item) => {
-            const isVideo = item.file_path.endsWith(".mp4");
+        <div className={`mb-4 grid h-[360px] gap-2 overflow-hidden rounded-[1.35rem] ${mediaGridClass(Math.min(post.media.length, 5))}`}>
+          {post.media.slice(0, 5).map((item, index) => {
+            const isVideo = isVideoFile(item);
+            const hiddenCount = post.media.length - 5;
 
-            return isVideo ? (
-              <video key={item.id} controls className="w-full rounded-xl">
-                <source src={item.file_path} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            ) : (
-              <img
+            return (
+              <motion.div
                 key={item.id}
-                src={item.file_path}
-                className="object-cover w-full rounded-xl"
-                alt="post media"
-              />
+                whileHover={{ scale: 1.025 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                className={`group relative min-h-0 overflow-hidden rounded-2xl bg-[#101632] ${mediaTileClass(Math.min(post.media.length, 5), index)}`}
+              >
+                {isVideo ? (
+                  <video controls className="h-full w-full object-cover">
+                    <source src={item.file_path} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <img
+                    src={item.file_path}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    alt="post media"
+                  />
+                )}
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#101632]/42 via-transparent to-white/10 opacity-70" />
+
+                {index === 4 && hiddenCount > 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#101632]/72 text-3xl font-black text-white backdrop-blur-sm">
+                    +{hiddenCount}
+                  </div>
+                )}
+              </motion.div>
             );
           })}
         </div>

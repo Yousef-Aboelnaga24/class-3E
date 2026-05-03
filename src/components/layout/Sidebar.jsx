@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
-import { FiHome, FiImage, FiClock, FiUsers, FiMessageSquare, FiPlusSquare, FiLogOut, FiShield } from 'react-icons/fi';
+import { FiHome, FiImage, FiClock, FiUsers, FiMessageSquare, FiPlusSquare, FiLogOut, FiShield, FiZap } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { path: '/gallery', label: 'Gallery', icon: FiImage },
   { path: '/timeline', label: 'Timeline', icon: FiClock },
   { path: '/members', label: 'Members', icon: FiUsers },
+  { path: '/play', label: 'Play', icon: FiZap },
   { path: '/confessions', label: 'Confessions', icon: FiMessageSquare },
 ];
 
@@ -21,12 +22,12 @@ export default function Sidebar() {
     : navItems;
 
   return (
-    <div className="fixed top-0 left-0 z-40 flex-col hidden w-64 h-screen px-6 py-8 overflow-y-auto border-r md:flex border-memory-border bg-white/50 backdrop-blur-xl">
+    <div className="fixed left-0 top-0 z-40 hidden h-screen w-64 flex-col overflow-y-auto border-r border-white/20 cosmic-panel px-6 py-8 text-white shadow-[18px_0_70px_rgba(37,99,235,0.22)] md:flex">
       <div className="flex items-center gap-3 mb-12">
-        <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-white rounded-xl bg-amber-gradient shadow-warm">
+        <div className="chromatic-ring flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-gradient text-xl font-black text-white shadow-warm">
           3E
         </div>
-        <span className="text-xl font-bold tracking-wide font-display text-memory-text">
+        <span className="neon-text text-xl font-bold tracking-wide text-white font-display">
           Class Memories
         </span>
       </div>
@@ -40,9 +41,9 @@ export default function Sidebar() {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all relative ${isActive
-                ? 'text-amber-warm font-semibold bg-amber-warm/10'
-                : 'text-memory-muted hover:text-memory-text hover:bg-black/5'
+              className={`relative flex items-center gap-4 rounded-2xl px-4 py-3 transition-all ${isActive
+                ? 'bg-white/16 font-semibold text-white shadow-[0_12px_34px_rgba(124,58,237,0.24)]'
+                : 'text-indigo-100/72 hover:bg-white/10 hover:text-white'
                 }`}
             >
               <Icon className="w-5 h-5" />
@@ -50,7 +51,7 @@ export default function Sidebar() {
               {isActive && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute top-0 left-0 w-1 h-full rounded-r-full bg-amber-warm"
+                  className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-sky-soft shadow-[0_0_18px_rgba(56,189,248,0.9)]"
                   initial={false}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
@@ -64,29 +65,29 @@ export default function Sidebar() {
         {canCreate && (
           <Link
             to="/create"
-            className="flex items-center justify-center w-full gap-2 mb-8 btn-primary shadow-warm hover:shadow-memory"
+            className="mb-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-gradient px-5 py-3 font-bold text-white shadow-warm transition-all hover:-translate-y-0.5 hover:shadow-memory"
           >
             <FiPlusSquare className="w-5 h-5" />
             <span>New Memory</span>
           </Link>
         )}
 
-        <div className="pt-6 border-t border-memory-border">
-          <Link to={`/profile/${user?.id}`} className="flex items-center gap-3 p-2 mb-6 transition-colors rounded-2xl hover:bg-black/5">
+        <div className="border-t border-white/15 pt-6">
+          <Link to={`/profile/${user?.id}`} className="mb-6 flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-white/10">
             <img
               src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
               alt={user?.name}
-              className="object-cover w-10 h-10 border-2 border-white rounded-full shadow-sm"
+              className="h-10 w-10 rounded-full border-2 border-sky-soft/70 object-cover shadow-[0_0_24px_rgba(56,189,248,0.35)]"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate text-memory-text">{user?.name}</p>
-              <p className="text-xs truncate text-memory-muted">View Profile</p>
+              <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
+              <p className="truncate text-xs text-indigo-100/70">View Profile</p>
             </div>
           </Link>
 
           <button
             onClick={logout}
-            className="flex items-center w-full gap-4 px-4 py-3 text-left transition-colors rounded-2xl text-memory-danger hover:bg-memory-danger/10"
+            className="flex w-full items-center gap-4 rounded-2xl px-4 py-3 text-left text-rose-200 transition-colors hover:bg-rose-500/14"
           >
             <FiLogOut className="w-5 h-5" />
             <span className="font-medium">Logout</span>

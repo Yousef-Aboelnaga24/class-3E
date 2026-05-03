@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FiHome, FiImage, FiClock, FiMessageSquare, FiPlusSquare, FiShield } from 'react-icons/fi';
+import { FiHome, FiImage, FiClock, FiPlusSquare, FiShield, FiZap } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../auth/AuthContext';
 
@@ -8,7 +8,7 @@ const navItems = [
   { path: '/gallery', icon: FiImage },
   { path: '/create', icon: FiPlusSquare, highlight: true },
   { path: '/timeline', icon: FiClock },
-  { path: '/confessions', icon: FiMessageSquare },
+  { path: '/play', icon: FiZap },
 ];
 
 export default function MobileNav() {
@@ -25,17 +25,17 @@ export default function MobileNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl border-t border-memory-border z-40 px-6 py-4 pb-safe flex items-center justify-between shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
+    <div className="fixed bottom-0 left-0 z-40 flex w-full items-center justify-between border-t border-white/20 bg-[#111A3B]/86 px-6 py-4 shadow-[0_-14px_48px_rgba(37,99,235,0.24)] backdrop-blur-2xl pb-safe md:hidden">
       {visibleNavItems.map((item) => {
         const isActive = location.pathname === item.path;
         const Icon = item.icon;
-        
+
         if (item.highlight) {
           return (
             <Link
               key={item.path}
               to={item.path}
-              className="relative -top-6 w-14 h-14 bg-amber-gradient rounded-full flex items-center justify-center text-white shadow-warm hover:shadow-memory transition-shadow"
+              className="relative flex items-center justify-center text-white transition-shadow rounded-full chromatic-ring -top-6 h-14 w-14 bg-amber-gradient shadow-warm hover:shadow-memory"
             >
               <Icon className="w-6 h-6" />
             </Link>
@@ -46,15 +46,14 @@ export default function MobileNav() {
           <Link
             key={item.path}
             to={item.path}
-            className={`relative p-3 rounded-2xl transition-colors ${
-              isActive ? 'text-amber-warm' : 'text-memory-muted hover:text-memory-text'
-            }`}
+            className={`relative rounded-2xl p-3 transition-colors ${isActive ? 'text-amber-warm' : 'text-indigo hover:text-white'
+              }`}
           >
             <Icon className="w-6 h-6" />
             {isActive && (
               <motion.div
                 layoutId="mobile-nav-active"
-                className="absolute inset-0 bg-amber-warm/10 rounded-2xl -z-10"
+                className="absolute inset-0 -z-10 rounded-2xl bg-white/14 shadow-[0_0_26px_rgba(56,189,248,0.25)]"
                 initial={false}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               />

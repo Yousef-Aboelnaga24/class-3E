@@ -20,6 +20,10 @@ const userService = {
     async updateUserRole(id, role) {
         return await axiosClient.post(`/users/${id}/role`, { role });
     },
+
+    async deleteUser(id) {
+        return await axiosClient.delete(`/users/${id}`);
+    },
 };
 
 export default userService;

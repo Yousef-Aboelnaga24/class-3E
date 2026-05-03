@@ -118,3 +118,51 @@ export function useUpdateUserRole() {
         },
     });
 }
+
+/* =========================
+   User Delete (ADMIN)
+========================= */
+export function useDeleteUser() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id) => userService.deleteUser(id),
+
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({ queryKey: ['users'] });
+
+            const previousUsers = queryClient.getQueryData(['users']);
+
+            queryClient.setQueryData(['users'], (old) => {
+                const data = old?.data || old;
+                const filtered = Array.isArray(data)
+                    ? data.filter((u) => u.id !== id)
+                    : data;
+
+                return old?.data
+                    ? { ...old, data: filtered }
+                    : filtered;
+            });
+
+            return { previousUsers };
+        },
+
+        onSuccess: () => {
+            toast.success('User removed successfully');
+        },
+
+        onError: (error, _, context) => {
+            if (context?.previousUsers) {
+                queryClient.setQueryData(['users'], context.previousUsers);
+            }
+
+            toast.error(
+                error.response?.data?.message || 'User delete failed'
+            );
+        },
+
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+        },
+    });
+}

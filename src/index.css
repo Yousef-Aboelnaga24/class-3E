@@ -14,19 +14,114 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-card;
+    @apply border border-white/60 bg-white/[0.74] shadow-card backdrop-blur-2xl;
   }
   
   .btn-primary {
-    @apply bg-amber-gradient text-white px-6 py-2.5 rounded-full font-medium shadow-warm hover:shadow-memory transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0;
+    @apply bg-amber-gradient text-white px-6 py-2.5 rounded-full font-semibold shadow-warm hover:shadow-memory transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0;
   }
 
   .btn-secondary {
-    @apply bg-white text-memory-text px-6 py-2.5 rounded-full font-medium shadow-card hover:shadow-card-hover transition-all hover:-translate-y-0.5 border border-memory-border active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0;
+    @apply border border-memory-border bg-white/80 text-memory-text px-6 py-2.5 rounded-full font-semibold shadow-card hover:shadow-card-hover transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0 backdrop-blur-xl;
   }
   
   .input-field {
     @apply w-full bg-white border border-memory-border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-warm/50 focus:border-amber-warm transition-all text-memory-text placeholder:text-memory-muted;
+  }
+
+  .bg-app-surface {
+    background:
+      radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.34), transparent 28%),
+      radial-gradient(circle at 82% 8%, rgba(124, 58, 237, 0.35), transparent 30%),
+      radial-gradient(circle at 76% 78%, rgba(192, 132, 252, 0.28), transparent 32%),
+      linear-gradient(135deg, rgba(248, 250, 255, 0.97) 0%, rgba(224, 231, 255, 0.94) 44%, rgba(237, 233, 254, 0.92) 100%);
+  }
+
+  .app-grid-lines {
+    background-image:
+      linear-gradient(rgba(37, 99, 235, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124, 58, 237, 0.08) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(to bottom, black, transparent 86%);
+  }
+
+  .hero-shell {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .hero-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(120deg, transparent 0 28%, rgba(255, 255, 255, 0.76) 45%, rgba(34, 211, 238, 0.22) 50%, transparent 66%),
+      repeating-linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0 1px, transparent 1px 16px);
+    transform: translateX(-64%);
+    animation: sheen 6s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  .hero-shell::after {
+    content: "";
+    position: absolute;
+    inset: auto 5% -24px 5%;
+    height: 70px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.28), rgba(124, 58, 237, 0.34), rgba(34, 211, 238, 0.28));
+    filter: blur(30px);
+    opacity: 0.9;
+    z-index: -2;
+  }
+
+  .cosmic-panel {
+    background:
+      linear-gradient(135deg, rgba(16, 22, 50, 0.95), rgba(37, 23, 91, 0.9) 48%, rgba(16, 71, 126, 0.92)),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 16px);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 24px rgba(124, 58, 237, 0.34), 0 0 44px rgba(56, 189, 248, 0.2);
+  }
+
+  .holo-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .holo-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+    transform: translateX(-140%);
+    animation: holoSweep 4.2s ease-in-out infinite;
+  }
+
+  .chromatic-ring {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.66) inset,
+      0 0 30px rgba(124, 58, 237, 0.38),
+      0 0 60px rgba(56, 189, 248, 0.25);
+  }
+}
+
+@keyframes sheen {
+  0%, 42% {
+    transform: translateX(-64%);
+  }
+  72%, 100% {
+    transform: translateX(64%);
+  }
+}
+
+@keyframes holoSweep {
+  0%, 38% {
+    transform: translateX(-140%);
+  }
+  70%, 100% {
+    transform: translateX(140%);
   }
 }
 
@@ -40,10 +135,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E5E7EB;
+  background: #A5B4FC;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #D1D5DB;
+  background: #7C3AED;
 }

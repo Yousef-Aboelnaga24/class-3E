@@ -4,13 +4,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight, FiKey } from 'react-icons/fi';
 import { useAuth } from '../../auth/AuthContext';
 import {PageTransition} from '../../components/layout/PageTransition';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  class_code: z.string().max(100, 'Class code is too long').optional(),
 });
 
 export default function Login() {
@@ -109,6 +110,28 @@ export default function Login() {
                 {errors.password && (
                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 ml-1 text-sm text-memory-danger">
                     {errors.password.message}
+                  </motion.p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 ml-1 text-sm font-medium text-memory-text">Class Code</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                    <FiKey className="text-memory-muted" />
+                  </div>
+                  <input
+                    type="text"
+                    {...register('class_code', {
+                      setValueAs: (value) => value?.trim().toUpperCase(),
+                    })}
+                    className={`input-field pl-11 uppercase tracking-[0.18em] ${errors.class_code ? 'border-memory-danger focus:ring-memory-danger' : ''}`}
+                    placeholder="3E-NEON"
+                  />
+                </div>
+                {errors.class_code && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 ml-1 text-sm text-memory-danger">
+                    {errors.class_code.message}
                   </motion.p>
                 )}
               </div>

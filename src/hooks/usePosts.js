@@ -40,6 +40,7 @@ export function useDeletePost() {
         mutationFn: (id) => postService.deletePost(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
+            queryClient.invalidateQueries({ queryKey: ['userPosts'] });
             toast.success('Memory deleted.');
         },
         onError: (error) => {
@@ -55,6 +56,8 @@ export function useUpdatePost() {
         mutationFn: ({ id, data }) => postService.updatePost(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['posts'] });
+            queryClient.invalidateQueries({ queryKey: ['post'] });
+            queryClient.invalidateQueries({ queryKey: ['userPosts'] });
             toast.success('Memory updated.');
         },
         onError: (error) => {
