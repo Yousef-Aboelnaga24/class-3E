@@ -18,7 +18,7 @@ import Admin from './pages/Admin'
 import Play from './pages/Play'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
-import VerifyEmail from './pages/auth/VerifyEmail'
+// import VerifyEmail from './pages/auth/VerifyEmail'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,14 +39,14 @@ export default function App() {
               {/* Auth routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route
+              {/* <Route
                 path="/verify-email"
                 element={
                   <ProtectedRoute requireVerification={false}>
                     <VerifyEmail />
                   </ProtectedRoute>
                 }
-              />
+              /> */}
 
               {/* Protected routes inside app layout */}
               <Route
